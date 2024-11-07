@@ -25,10 +25,12 @@ export class EventBridgeLambdaFargateCloudWatchPostgreSqlCdkStack extends cdk.St
     });
 
     // Create ECR repository for the container
-    const repository = new ecr.Repository(this, 'MyRepo', {
+    // CDK will build and push the image to a CDK-managed ECR repository during the deployment process automatically.
+    // No need to manually build or push the image.
+    /*const repository = new ecr.Repository(this, 'MyRepo', {
       repositoryName: 'message-logger',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+    });*/
 
     // IAM role for ECS task execution
     const ecsTaskExecutionRole = new iam.Role(this, 'EcsTaskExecutionRole', {
@@ -84,7 +86,8 @@ export class EventBridgeLambdaFargateCloudWatchPostgreSqlCdkStack extends cdk.St
     });
 
     const container = taskDefinition.addContainer('MyContainer', {
-      image: ecs.ContainerImage.fromEcrRepository(repository),
+      //image: ecs.ContainerImage.fromEcrRepository(repository), // ECS pulls the already-built image from ECR and runs the container
+      image: ecs.ContainerImage.fromAsset('./'), // Docker image is built during the CDK deployment
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'MyAppLogs',
         logGroup: new logs.LogGroup(this, 'LogGroup', {
